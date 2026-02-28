@@ -45,13 +45,8 @@ struct DangerCardView: View {
             
             Button(action: onDismiss) {
                 Text("Dismiss Safety Warning")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.red)
-                    .cornerRadius(12)
             }
+            .buttonStyle(SafeSpaceButtonStyle())
             .padding(.top, 8)
         }
         .padding()

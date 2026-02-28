@@ -4,8 +4,22 @@ struct AROverlayView: View {
     let detection: DetectionResult
     @State private var isPulsing = false
     
+    // Haptic feedback generator
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
+    
     var body: some View {
         ZStack {
+            // Soft red vignette effect
+            RadialGradient(
+                gradient: Gradient(colors: [.clear, .clear, .red.opacity(0.1), .red.opacity(0.35)]),
+                center: .center,
+                startRadius: 100,
+                endRadius: UIScreen.main.bounds.width
+            )
+            .ignoresSafeArea()
+            .opacity(isPulsing ? 1.0 : 0.4)
+            .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isPulsing)
+            
             // Central Target Bounding Box
             RoundedRectangle(cornerRadius: 16)
                 .stroke(detection.dangerLevel.color, lineWidth: 4)
@@ -22,6 +36,9 @@ struct AROverlayView: View {
                 )
                 .onAppear {
                     isPulsing = true
+                    // Trigger haptic pulse when danger frame locks on
+                    impactFeedback.prepare()
+                    impactFeedback.impactOccurred()
                 }
             
             // Text Overlays anchored to the bounding box

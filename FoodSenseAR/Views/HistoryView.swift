@@ -38,16 +38,22 @@ struct HistoryView: View {
                         .listRowBackground(Color.red.opacity(0.05))
                     }
                 }
+                
+                if !arViewModel.detectionHistory.isEmpty {
+                    Button(action: { arViewModel.clearHistory() }) {
+                        Text("Clear History")
+                    }
+                    .buttonStyle(SafeSpaceButtonStyle(backgroundColor: .red.opacity(0.1), foregroundColor: .red))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .padding(.top, 16)
+                }
             }
             .navigationTitle("Detection History")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Close") { dismiss() }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Clear History") { arViewModel.clearHistory() }
-                        .foregroundColor(.red)
                 }
             }
         }

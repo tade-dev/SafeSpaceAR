@@ -2,6 +2,37 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var arViewModel: ARViewModel
+    @State private var isSplashActive = true
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    
+    var body: some View {
+        ZStack {
+            if isSplashActive {
+                SplashScreenView()
+                    .transition(.opacity)
+            } else if !hasSeenOnboarding {
+                OnboardingView()
+                    .transition(.opacity)
+            } else {
+                MainARView()
+                    .environmentObject(arViewModel)
+                    .transition(.opacity)
+            }
+        }
+        .onAppear {
+            // Dismiss splash screen after 2 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    isSplashActive = false
+                }
+            }
+        }
+    }
+}
+
+// Extracted the main AR interface into its own view to keep things clean
+struct MainARView: View {
+    @EnvironmentObject var arViewModel: ARViewModel
     @State private var showingHistory = false
     
     var body: some View {
