@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 06/02/2026.
+//
+
+
 import SwiftUI
 
 struct ContentView: View {
@@ -20,7 +28,6 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Dismiss splash screen after 2 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation(.easeInOut(duration: 0.5)) {
                     isSplashActive = false
@@ -30,7 +37,7 @@ struct ContentView: View {
     }
 }
 
-// Extracted the main AR interface into its own view to keep things clean
+// main ar view
 struct MainARView: View {
     @EnvironmentObject var arViewModel: ARViewModel
     @State private var showingHistory = false
@@ -38,23 +45,23 @@ struct MainARView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background Camera/AR View
+                // background AR View
                 ARViewContainer()
                     .environmentObject(arViewModel)
                     .ignoresSafeArea()
                 
-                // Live AR Bounds Overlay (Only when detection locked in)
+                // live bounds 
                 if let currentDetection = arViewModel.currentDetection {
                     AROverlayView(detection: currentDetection)
                         .transition(.scale(scale: 0.95).combined(with: .opacity))
                         .animation(.easeInOut(duration: 0.3), value: arViewModel.currentDetection?.id)
                 }
                 
-                // The new scanning reticle replacing the immediate spawn
+                // scanning reticle 
                 ScanningIndicatorView()
                     .environmentObject(arViewModel)
                 
-                // Safe/Danger Status UI Overlay
+                // status ui
                 VStack {
                     HStack(alignment: .top) {
                         Spacer()
@@ -84,7 +91,7 @@ struct MainARView: View {
                     Spacer()
                 }
                 
-                // Bottom Sheet Danger Card
+                // sheet
                 VStack {
                     Spacer()
                     if let currentDetection = arViewModel.currentDetection {
@@ -107,10 +114,6 @@ struct MainARView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: { showingHistory = true }) {
                         Image(systemName: "clock.arrow.circlepath")
-                            .foregroundColor(.white)
-                            .padding(8)
-                            .background(Color.black.opacity(0.5))
-                            .clipShape(Circle())
                     }
                 }
             }
@@ -119,7 +122,7 @@ struct MainARView: View {
                     .environmentObject(arViewModel)
             }
         }
-        // Native observation to print logging optionally alongside AR display
+        // debug logging
         .onChange(of: arViewModel.currentDetection?.id) { oldValue, newValue in
             if let result = arViewModel.currentDetection {
                 print("⚠️ [DANGER DETECTED] \(result.formattedLabel) - \(Int(result.confidence * 100))%")

@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 15/02/2026.
+//
+
+
 import SwiftUI
 
 struct DangerCardView: View {
@@ -6,17 +14,16 @@ struct DangerCardView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            // Drag handle indicator
             Capsule()
                 .fill(Color.secondary.opacity(0.5))
                 .frame(width: 40, height: 5)
                 .padding(.top, 8)
             
-            Image(systemName: "exclamationmark.triangle.fill")
+            Image(systemName: detection.dangerLevel.icon)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 50)
-                .foregroundColor(.red)
+                .foregroundColor(detection.dangerLevel.color)
             
             Text(detection.formattedLabel)
                 .font(.title2)
@@ -24,13 +31,13 @@ struct DangerCardView: View {
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
             
-            Text("HIGH DANGER")
+            Text(detection.dangerLevel.label.uppercased())
                 .font(.caption)
                 .fontWeight(.black)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Color.red.opacity(0.2))
-                .foregroundColor(.red)
+                .background(detection.dangerLevel.color.opacity(0.2))
+                .foregroundColor(detection.dangerLevel.color)
                 .clipShape(Capsule())
             
             Text(detection.safetyTip)
@@ -46,7 +53,7 @@ struct DangerCardView: View {
             Button(action: onDismiss) {
                 Text("Dismiss Safety Warning")
             }
-            .buttonStyle(SafeSpaceButtonStyle())
+            .buttonStyle(SafeSpaceButtonStyle(backgroundColor: detection.dangerLevel.color))
             .padding(.top, 8)
         }
         .padding()

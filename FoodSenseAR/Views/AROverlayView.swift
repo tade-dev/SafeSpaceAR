@@ -1,17 +1,24 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 15/02/2026.
+//
+
+
 import SwiftUI
 
 struct AROverlayView: View {
     let detection: DetectionResult
     @State private var isPulsing = false
     
-    // Haptic feedback generator
+    // haptics!
     private let impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     
     var body: some View {
         ZStack {
-            // Soft red vignette effect
             RadialGradient(
-                gradient: Gradient(colors: [.clear, .clear, .red.opacity(0.1), .red.opacity(0.35)]),
+                gradient: Gradient(colors: [.clear, .clear, detection.dangerLevel.color.opacity(0.1), detection.dangerLevel.color.opacity(0.35)]),
                 center: .center,
                 startRadius: 100,
                 endRadius: UIScreen.main.bounds.width
@@ -20,7 +27,7 @@ struct AROverlayView: View {
             .opacity(isPulsing ? 1.0 : 0.4)
             .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isPulsing)
             
-            // Central Target Bounding Box
+            // target box
             RoundedRectangle(cornerRadius: 16)
                 .stroke(detection.dangerLevel.color, lineWidth: 4)
                 .frame(width: 250, height: 250)
@@ -36,20 +43,17 @@ struct AROverlayView: View {
                 )
                 .onAppear {
                     isPulsing = true
-                    // Trigger haptic pulse when danger frame locks on
                     impactFeedback.prepare()
                     impactFeedback.impactOccurred()
                 }
             
-            // Text Overlays anchored to the bounding box
+            // overlays
             VStack {
-                // Spacer pushes the overlay content to align with the bounding box
                 Spacer()
                 
                 VStack(spacing: 8) {
-                    // Badge Header
                     HStack(spacing: 6) {
-                        Image(systemName: "exclamationmark.triangle.fill")
+                        Image(systemName: detection.dangerLevel.icon)
                             .font(.headline)
                         
                         Text(detection.formattedLabel)
@@ -63,7 +67,6 @@ struct AROverlayView: View {
                     .clipShape(Capsule())
                     .shadow(radius: 4)
                     
-                    // Safety Tip
                     Text(detection.safetyTip)
                         .font(.subheadline)
                         .fontWeight(.medium)
@@ -76,7 +79,6 @@ struct AROverlayView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .shadow(radius: 4)
                 }
-                // Offset positions this group right above or below the bounding box
                 .offset(y: -140) 
             }
         }
@@ -86,9 +88,8 @@ struct AROverlayView: View {
 #Preview {
     AROverlayView(
         detection: DetectionResult(
-            label: "scissors_knives",
-            confidence: 0.95,
-            dangerLevel: .high
+            label: "scissors",
+            confidence: 0.95
         )
     )
     .background(Color.gray)

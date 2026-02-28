@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 06/02/2026.
+//
+
+
 import SwiftUI
 
 @main

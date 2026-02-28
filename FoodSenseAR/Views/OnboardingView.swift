@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 25/02/2026.
+//
+
+
 import SwiftUI
 
 struct OnboardingView: View {
@@ -27,11 +35,11 @@ struct OnboardingView: View {
                     .tag(1)
                     
                     // Page 3
-                    VStack(spacing: 32) {
+                    VStack(spacing: 20) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(height: 100)
+                            .frame(height: 60)
                             .foregroundColor(.red)
                         
                         Text("What We Detect")
@@ -39,24 +47,29 @@ struct OnboardingView: View {
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
                         
-                        VStack(alignment: .leading, spacing: 20) {
-                            DangerRow(icon: "scissors", title: "Scissors & Knives", subtitle: "Sharp objects left in the open")
-                            DangerRow(icon: "powerplug", title: "Electrical Outlets", subtitle: "Exposed sockets and loose cables")
-                            DangerRow(icon: "bubbles.and.sparkles", title: "Cleaning Products", subtitle: "Harmful chemicals within reach")
+                        ScrollView(showsIndicators: false) {
+                            VStack(alignment: .leading, spacing: 16) {
+                                DangerRow(emoji: "✂️", title: "Scissors", subtitle: "Sharp objects left in the open")
+                                DangerRow(emoji: "🔪", title: "Knives", subtitle: "Unsecured knives in child spaces")
+                                DangerRow(emoji: "🔥", title: "Matches & Lighters", subtitle: "Fire hazards left unattended")
+                                DangerRow(emoji: "🍶", title: "Glass Bottles", subtitle: "Breakable glass in low areas")
+                                DangerRow(emoji: "🌡️", title: "Hot Appliances", subtitle: "Plugged in or cooling appliances")
+                                DangerRow(emoji: "🛍️", title: "Plastic Bags", subtitle: "Suffocation hazards in reach")
+                                DangerRow(emoji: "⚡", title: "Electrical Hazards", subtitle: "Exposed sockets and loose cables")
+                                DangerRow(emoji: "🧴", title: "Liquid & Chemical", subtitle: "Harmful chemicals within reach")
+                            }
+                            .padding(.horizontal, 32)
+                            .padding(.bottom, 20)
                         }
-                        .padding(.horizontal, 32)
-                        
-                        Spacer()
                     }
-                    .padding(.top, 60)
+                    .padding(.top, 50)
                     .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
                 .animation(.easeInOut, value: currentPage)
                 
-                Spacer()
+                Spacer(minLength: 0)
                 
-                // Navigation/Action Button
                 if currentPage == 2 {
                     Button(action: {
                         withAnimation(.easeInOut) {
@@ -84,7 +97,6 @@ struct OnboardingView: View {
     }
 }
 
-// Subcomponent for simple icon/text pairing
 struct OnboardingPage: View {
     let iconName: String
     let title: String
@@ -114,15 +126,14 @@ struct OnboardingPage: View {
 }
 
 struct DangerRow: View {
-    let icon: String
+    let emoji: String
     let title: String
     let subtitle: String
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: icon)
+            Text(emoji)
                 .font(.title2)
-                .foregroundColor(.red)
                 .frame(width: 32)
             
             VStack(alignment: .leading, spacing: 4) {

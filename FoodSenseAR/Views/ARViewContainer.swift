@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 15/02/2026.
+//
+
+
 import SwiftUI
 import ARKit
 
@@ -6,12 +14,7 @@ struct ARViewContainer: UIViewRepresentable {
     
     func makeUIView(context: Context) -> ARSCNView {
         let arView = ARSCNView(frame: .zero)
-        
-        // Adopt the coordinator as the ARSCNViewDelegate
         arView.delegate = context.coordinator
-        
-        // Debugging / Performance settings
-        // arView.showsStatistics = true
         
         arView.session.run(context.coordinator.configuration)
         
@@ -42,11 +45,9 @@ struct ARViewContainer: UIViewRepresentable {
         private var detectionService: DetectionService?
         private var lastDetectionTime: TimeInterval = 0
         private let detectionInterval: TimeInterval = 0.5
-        
-        // Execute the Vision requests off the main thread to ensure the AR viewport runs smoothly at 60fps
+        // Keep vision tracking off main thread to prevent lag
         private let processingQueue = DispatchQueue(label: "com.safespace.processing", qos: .userInitiated)
         
-        // Avoid queueing up overlapping frames if one takes longer than 0.5 seconds
         private var isProcessingFrame = false
         
         init(_ parent: ARViewContainer) {
@@ -69,38 +70,30 @@ struct ARViewContainer: UIViewRepresentable {
         // MARK: - ARSCNViewDelegate
         
         func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-            // Respect the global pause toggle
             guard parent.arViewModel.isScanning else { return }
             
-            // Step 1: Throttle processing pipeline to occur ~ every 0.5 seconds
             guard time - lastDetectionTime >= detectionInterval else { return }
             
-            // Step 2: Prevent concurrent frame pileup
             guard !isProcessingFrame else { return }
             
-            // Step 3: Extract the ARKit camera pixel buffer safely
             guard let arView = renderer as? ARSCNView,
                   let currentFrame = arView.session.currentFrame else { return }
             
             let pixelBuffer = currentFrame.capturedImage
             
-            // Checkmark logic locks
             lastDetectionTime = time
             isProcessingFrame = true
             
-            // Step 4: Dispatch processing queue to the DetectionService asynchronously
             processingQueue.async { [weak self] in
                 guard let self = self else { return }
                 
                 self.detectionService?.performClassification(on: pixelBuffer) { result in
                     defer {
-                        // Release the lock exactly when the callback is finalized
                         self.isProcessingFrame = false
                     }
                     
                     switch result {
                     case .success(let detectionResult):
-                        // Passes control back to the ObservableObject
                         self.parent.arViewModel.updateDetection(detectionResult)
                         
                     case .failure(let error):

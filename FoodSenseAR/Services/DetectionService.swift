@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 14/02/2026.
+//
+
+
 import Foundation
 import CoreML
 import Vision
@@ -28,12 +36,10 @@ enum DetectionError: LocalizedError {
 
 class DetectionService {
     private var visionModel: VNCoreMLModel?
-    private let confidenceThreshold: Float = 0.90
+    private let confidenceThreshold: Float = 0.99
     
-    /// Initializes the DetectionService by safely loading the CoreML model.
-    /// Requirements: The .mlmodel file (or .mlpackage) needs to be compiled into the app bundle.
     init() throws {
-        // Loads the compiled CreateML model from the bundle dynamically.
+        // load compiled ML model
         guard let modelURL = Bundle.main.url(forResource: "SafeSpaceClassifier", withExtension: "mlmodelc") else {
             throw DetectionError.modelNotFound
         }
@@ -47,9 +53,8 @@ class DetectionService {
         }
     }
     
-    /// Processes a CVPixelBuffer from the camera.
-    /// Returns a DetectionResult if its confidence >= 90%.
-    /// Returns nil if confidence < 90% (treated as safe) or if the class is unknown.
+    // run prediction
+
     func performClassification(
         on pixelBuffer: CVPixelBuffer,
         completion: @escaping (Result<DetectionResult?, Error>) -> Void
@@ -59,7 +64,6 @@ class DetectionService {
             return
         }
         
-        // Build the Vision CoreML request
         let request = VNCoreMLRequest(model: visionModel) { [weak self] request, error in
             guard let self = self else { return }
             
@@ -68,7 +72,6 @@ class DetectionService {
                 return
             }
             
-            // Image Classifiers return an array of VNClassificationObservation
             guard let results = request.results as? [VNClassificationObservation],
                   let topResult = results.first else {
                 completion(.failure(DetectionError.requestFailed))
@@ -78,10 +81,18 @@ class DetectionService {
             let label = topResult.identifier
             let confidence = topResult.confidence
             
-            // Allow listed classes. Other classes (or fallback classes) automatically return nil (safe)
-            let validClasses = ["scissors_knives", "electrical_outlets_cables", "cleaning_products"]
+            let validClasses = [
+                "scissors",
+                "knives",
+                "matches_lighters",
+                "glass_bottles",
+                "hot_appliances",
+                "plastic_bags",
+                "electrical_outlets_cables",
+                "liquid_chemical_hazards"
+            ]
             
-            // Enforce confidence threshold: under 0.90 is ignored and returned as nil (safe)
+            // filter out low confidence
             guard confidence >= self.confidenceThreshold, validClasses.contains(label) else {
                 completion(.success(nil))
                 return
@@ -89,18 +100,14 @@ class DetectionService {
             
             let result = DetectionResult(
                 label: label,
-                confidence: confidence,
-                dangerLevel: .high
+                confidence: confidence
             )
             
             completion(.success(result))
         }
         
-        // Use center crop to adjust the rectangular image frame from ARKit 
-        // to the model's preferred square aspect ratio
         request.imageCropAndScaleOption = .centerCrop
         
-        // The standard ARKit orientation is typically .right
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
         
         do {

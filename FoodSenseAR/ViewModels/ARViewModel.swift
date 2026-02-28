@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 14/02/2026.
+//
+
+
 import Foundation
 import Combine
 import SwiftUI
@@ -17,15 +25,11 @@ class ARViewModel: ObservableObject {
     // MARK: - Update Methods
     func updateDetection(_ result: DetectionResult?) {
         DispatchQueue.main.async {
-            // Guard scanning wasn't globally paused or card is already up
             guard self.isScanning, self.currentDetection == nil else { return }
             
             if let result = result {
-                if self.currentTargetLabel == result.label {
-                    // It's consistently the same object; the timer is handling progress
-                } else {
-                    self.startScanning(for: result)
-                }
+                guard self.currentTargetLabel != result.label else { return }
+                self.startScanning(for: result)
             } else {
                 self.resetScanning()
             }
@@ -73,9 +77,8 @@ class ARViewModel: ObservableObject {
         }
     }
     
-    // Limits the log history to the 20 most recent unique elements
     private func addToHistory(_ result: DetectionResult) {
-        // Prevent rapid duplicate fires from identical labels filling the array instantly 
+        // block spam
         if let last = detectionHistory.first, 
            last.label == result.label, 
            Date().timeIntervalSince(last.timestamp) < 5.0 {

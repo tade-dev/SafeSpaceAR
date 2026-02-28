@@ -1,7 +1,14 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 06/02/2026.
+//
+
+
 import Foundation
 import CoreGraphics
 
-// Four classes defined by the CoreML image classification model
 enum DangerCategory: String, CaseIterable {
     case scissorsKnives = "scissors_knives"
     case electricalOutletsCables = "electrical_outlets_cables"

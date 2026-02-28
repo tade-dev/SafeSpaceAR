@@ -1,3 +1,11 @@
+//
+//  SwiftUIView.swift
+//  FoodSenseAR
+//
+//  Created by BSTAR on 06/02/2026.
+//
+
+
 import Foundation
 
 struct DetectionHistoryItem: Identifiable {
@@ -6,6 +14,7 @@ struct DetectionHistoryItem: Identifiable {
     let formattedLabel: String
     let confidence: Float
     let safetyTip: String
+    let dangerLevel: DangerLevel
     let timestamp: Date
     
     init(from result: DetectionResult) {
@@ -13,6 +22,7 @@ struct DetectionHistoryItem: Identifiable {
         self.formattedLabel = result.formattedLabel
         self.confidence = result.confidence
         self.safetyTip = result.safetyTip
+        self.dangerLevel = result.dangerLevel
         self.timestamp = Date()
     }
 }
